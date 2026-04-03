@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Гра знайомства</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --tg-theme-bg-color: #1a1a2e;
+      --tg-theme-text-color: #ffffff;
+      --tg-theme-button-color: #6c63ff;
+      --tg-theme-button-text-color: #ffffff;
+      --tg-theme-secondary-bg-color: #16213e;
+      --tg-theme-hint-color: #aaaaaa;
+      --color-know: #4facfe;
+      --color-finance: #f7971e;
+      --color-intimacy: #f953c6;
+      --color-adult: #eb3349;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--tg-theme-bg-color);
+      color: var(--tg-theme-text-color);
+      min-height: 100vh;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, var(--color-know), var(--color-intimacy));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header p {
+      color: var(--tg-theme-hint-color);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .screen {
+      display: none;
+      flex: 1;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .categories-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .category-card {
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 16px;
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 140px;
+    }
+
+    .category-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .category-card:active {
+      transform: translateY(-2px);
+    }
+
+    .category-card.locked {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .category-card.locked:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .category-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .category-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .category-desc {
+      font-size: 12px;
+      color: var(--tg-theme-hint-color);
+      font-weight: 600;
+    }
+
+    .category-card.knowledge {
+      border-color: var(--color-know);
+    }
+
+    .category-card.knowledge .category-icon {
+      filter: drop-shadow(0 0 8px var(--color-know));
+    }
+
+    .category-card.finance {
+      border-color: var(--color-finance);
+    }
+
+    .category-card.finance .category-icon {
+      filter: drop-shadow(0 0 8px var(--color-finance));
+    }
+
+    .category-card.intimacy {
+      border-color: var(--color-intimacy);
+    }
+
+    .category-card.intimacy .category-icon {
+      filter: drop-shadow(0 0 8px var(--color-intimacy));
+    }
+
+    .category-card.adult {
+      border-color: var(--color-adult);
+    }
+
+    .category-card.adult .category-icon {
+      filter: drop-shadow(0 0 8px var(--color-adult));
+    }
+
+    .btn {
+      background: var(--tg-theme-button-color);
+      color: var(--tg-theme-button-text-color);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      width: 100%;
+      margin-bottom: 12px;
+      font-family: inherit;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(108, 99, 255, 0.4);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: var(--tg-theme-secondary-bg-color);
+      border: 2px solid var(--tg-theme-button-color);
+    }
+
+    .btn-small {
+      padding: 12px 20px;
+      font-size: 14px;
+    }
+
+    .game-header {
+      margin-bottom: 20px;
+    }
+
+    .game-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .game-progress {
+      height: 6px;
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+
+    .game-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--color-know), var(--color-intimacy));
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+
+    .game-counter {
+      text-align: center;
+      font-size: 14px;
+      color: var(--tg-theme-hint-color);
+      font-weight: 600;
+    }
+
+    .question-card {
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 20px;
+      padding: 32px 24px;
+      margin-bottom: 24px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 250px;
+      border: 2px solid rgba(108, 99, 255, 0.2);
+    }
+
+    .question-text {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .spinner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .spinner-circle {
+      width: 48px;
+      height: 48px;
+      border: 4px solid var(--tg-theme-secondary-bg-color);
+      border-top-color: var(--tg-theme-button-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spinner-text {
+      color: var(--tg-theme-hint-color);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .game-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .confirmation-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .confirmation-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .confirmation-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .confirmation-text {
+      font-size: 16px;
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .confirmation-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .completion-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .completion-icon {
+      font-size: 80px;
+      margin-bottom: 20px;
+      animation: bounce 0.6s ease-out;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .completion-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .completion-text {
+      font-size: 16px;
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 32px;
+      line-height: 1.6;
+    }
+
+    .completion-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 20px;
+      color: var(--tg-theme-hint-color);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .error-message {
+      background: rgba(235, 51, 73, 0.2);
+      border: 1px solid var(--color-adult);
+      border-radius: 12px;
+      padding: 16px;
+      color: var(--color-adult);
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    @media (max-width: 375px) {
+      .container {
+        padding: 16px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+      }
+
+      .categories-grid {
+        gap: 12px;
+      }
+
+      .category-card {
+        padding: 20px 12px;
+        min-height: 120px;
+      }
+
+      .category-icon {
+        font-size: 40px;
+      }
+
+      .category-title {
+        font-size: 14px;
+      }
+
+      .category-desc {
+        font-size: 11px;
+      }
+
+      .question-card {
+        padding: 24px 16px;
+        min-height: 200px;
+      }
+
+      .question-text {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🎮 Гра знайомства</h1>
+      <p>Пізнайте одне одного краще</p>
+    </div>
+
+    <!-- Screen 1: Main Menu -->
+    <div id="screen-menu" class="screen active">
+      <div class="categories-grid">
+        <div class="category-card knowledge" data-category="знайомство">
+          <div class="category-icon">🙋</div>
+          <div class="category-title">Знайомство</div>
+          <div class="category-desc">Базові питання про себе</div>
+        </div>
+
+        <div class="category-card finance" data-category="фінанси">
+          <div class="category-icon">💰</div>
+          <div class="category-title">Фінанси</div>
+          <div class="category-desc">Ставлення до грошей</div>
+        </div>
+
+        <div class="category-card intimacy" data-category="зближення">
+          <div class="category-icon">❤️</div>
+          <div class="category-title">Зближення</div>
+          <div class="category-desc">Глибокі та щирі питання</div>
+        </div>
+
+        <div class="category-card adult locked" data-category="18+" id="adult-card">
+          <div class="category-icon">🔒</div>
+          <div class="category-title">18+</div>
+          <div class="category-desc">Тільки для дорослих</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        Питання генерує AI 🤖
+      </div>
+    </div>
+
+    <!-- Screen 2: 18+ Confirmation -->
+    <div id="screen-confirm" class="screen">
+      <div class="confirmation-screen">
+        <div class="confirmation-icon">🔞</div>
+        <h2 class="confirmation-title">Підтвердження</h2>
+        <p class="confirmation-text">
+          Ця категорія містить дорослий контент. <br>
+          Ви маєте бути повнолітнім для доступу.
+        </p>
+        <div class="confirmation-actions">
+          <button class="btn" id="confirm-yes">Мені є 18 років ✓</button>
+          <button class="btn btn-secondary" id="confirm-no">Назад</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 3: Game (Questions) -->
+    <div id="screen-game" class="screen">
+      <div class="game-header">
+        <h2 class="game-title" id="game-category-title">Категорія</h2>
+        <div class="game-progress">
+          <div class="game-progress-bar" id="progress-bar" style="width: 0%"></div>
+        </div>
+        <div class="game-counter" id="question-counter">Питання 0 / 10</div>
+      </div>
+
+      <div id="question-container">
+        <div class="spinner" id="loading-spinner">
+          <div class="spinner-circle"></div>
+          <div class="spinner-text">Генерую питання...</div>
+        </div>
+
+        <div class="question-card" id="question-card" style="display: none;">
+          <div class="question-text" id="question-text"></div>
+        </div>
+      </div>
+
+      <div class="game-actions" id="game-actions" style="display: none;">
+        <button class="btn" id="next-question">➡️ Наступне питання</button>
+        <button class="btn btn-secondary" id="change-category">🔀 Інша категорія</button>
+        <button class="btn btn-secondary" id="share-question">📤 Поділитись</button>
+      </div>
+
+      <div id="error-container" style="display: none;"></div>
+    </div>
+
+    <!-- Screen 4: Completion -->
+    <div id="screen-complete" class="screen">
+      <div class="completion-screen">
+        <div class="completion-icon">🎉</div>
+        <h2 class="completion-title">Гру завершено!</h2>
+        <p class="completion-text" id="completion-text">
+          Ви відповіли на 10 питань
+        </p>
+        <div class="completion-actions">
+          <button class="btn" id="play-again">🎮 Грати знову</button>
+          <button class="btn btn-secondary" id="close-app">Закрити</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Telegram Web App
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // Get theme colors from Telegram
+    const themeParams = tg.themeParams || {};
+    const root = document.documentElement;
+
+    // Apply Telegram theme colors
+    if (themeParams.bg_color) {
+      root.style.setProperty('--tg-theme-bg-color', themeParams.bg_color);
+    }
+    if (themeParams.text_color) {
+      root.style.setProperty('--tg-theme-text-color', themeParams.text_color);
+    }
+    if (themeParams.button_color) {
+      root.style.setProperty('--tg-theme-button-color', themeParams.button_color);
+    }
+    if (themeParams.button_text_color) {
+      root.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color);
+    }
+    if (themeParams.secondary_bg_color) {
+      root.style.setProperty('--tg-theme-secondary-bg-color', themeParams.secondary_bg_color);
+    }
+    if (themeParams.hint_color) {
+      root.style.setProperty('--tg-theme-hint-color', themeParams.hint_color);
+    }
+
+    // API Key - MUST BE SET BY USER
+    const ANTHROPIC_API_KEY = 'YOUR_ANTHROPIC_API_KEY_HERE';
+
+    // Game state
+    const gameState = {
+      currentCategory: null,
+      questionCount: 0,
+      maxQuestions: 10,
+      previousQuestions: [],
+      ageConfirmed: false,
+      currentQuestion: ''
+    };
+
+    // Load age confirmation from localStorage
+    function loadAgeConfirmation() {
+      const saved = localStorage.getItem('age_confirmed');
+      if (saved === 'true') {
+        gameState.ageConfirmed = true;
+        const adultCard = document.getElementById('adult-card');
+        if (adultCard) {
+          adultCard.classList.remove('locked');
+          adultCard.querySelector('.category-icon').textContent = '🔓';
+          adultCard.querySelector('.category-desc').textContent = 'Тільки для дорослих';
+        }
+      }
+    }
+
+    // Save age confirmation to localStorage
+    function saveAgeConfirmation() {
+      localStorage.setItem('age_confirmed', 'true');
+    }
+
+    // Screen management
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(screen => {
+        screen.classList.remove('active');
+      });
+      document.getElementById(screenId).classList.add('active');
+    }
+
+    // Category prompts
+    const categoryPrompts = {
+      'знайомство': 'легке, відкрите питання про особистість, звички або мрії людини',
+      'фінанси': 'питання про ставлення до грошей, фінансові цінності або досвід (без конкретних сум)',
+      'зближення': 'глибоке, щире питання про почуття, страхи або стосунки',
+      '18+': 'відверте питання про бажання, сексуальність або пристрасть (для дорослих)'
+    };
+
+    // Generate question using Claude API
+    async function generateQuestion(category) {
+      if (ANTHROPIC_API_KEY === 'YOUR_ANTHROPIC_API_KEY_HERE') {
+        throw new Error('Будь ласка, встановіть ANTHROPIC_API_KEY у коді');
+      }
+
+      const previousQuestionsList = gameState.previousQuestions.join(' | ');
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-client-side-allow-cors': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 200,
+          system: `Ти генеруєш питання для гри-знайомства українською мовою.
+Правила:
+- Питання коротке (1-2 речення максимум)
+- Питання унікальне, не повторює попередні
+- Питання провокує цікаву відповідь та діалог
+- НЕ додавай нумерацію, лапки, пояснення — тільки саме питання
+- Вже задані питання: ${previousQuestionsList}`,
+          messages: [{
+            role: 'user',
+            content: `Придумай ${categoryPrompts[category]}.`
+          }]
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || 'Помилка API');
+      }
+
+      const data = await response.json();
+      const question = data.content[0].text.trim();
+
+      // Add to previous questions
+      gameState.previousQuestions.push(question);
+
+      return question;
+    }
+
+    // Show error
+    function showError(message) {
+      const errorContainer = document.getElementById('error-container');
+      errorContainer.innerHTML = `<div class="error-message">${message}</div>`;
+      errorContainer.style.display = 'block';
+    }
+
+    // Hide error
+    function hideError() {
+      document.getElementById('error-container').style.display = 'none';
+    }
+
+    // Start game with selected category
+    async function startGame(category) {
+      gameState.currentCategory = category;
+      gameState.questionCount = 0;
+      gameState.previousQuestions = [];
+
+      showScreen('screen-game');
+      updateProgress();
+
+      document.getElementById('game-category-title').textContent = getCategoryTitle(category);
+      document.getElementById('loading-spinner').style.display = 'flex';
+      document.getElementById('question-card').style.display = 'none';
+      document.getElementById('game-actions').style.display = 'none';
+      hideError();
+
+      try {
+        const question = await generateQuestion(category);
+        gameState.currentQuestion = question;
+        showQuestion(question);
+      } catch (error) {
+        showError(error.message);
+        document.getElementById('loading-spinner').style.display = 'none';
+      }
+    }
+
+    // Show question
+    function showQuestion(question) {
+      document.getElementById('loading-spinner').style.display = 'none';
+      document.getElementById('question-card').style.display = 'flex';
+      document.getElementById('question-text').textContent = question;
+      document.getElementById('game-actions').style.display = 'flex';
+    }
+
+    // Update progress bar and counter
+    function updateProgress() {
+      const progress = (gameState.questionCount / gameState.maxQuestions) * 100;
+      document.getElementById('progress-bar').style.width = `${progress}%`;
+      document.getElementById('question-counter').textContent =
+        `Питання ${gameState.questionCount} / ${gameState.maxQuestions}`;
+    }
+
+    // Get category title
+    function getCategoryTitle(category) {
+      const titles = {
+        'знайомство': '🙋 Знайомство',
+        'фінанси': '💰 Фінанси',
+        'зближення': '❤️ Зближення',
+        '18+': '🔥 18+'
+      };
+      return titles[category] || category;
+    }
+
+    // Next question
+    async function nextQuestion() {
+      if (gameState.questionCount >= gameState.maxQuestions) {
+        completeGame();
+        return;
+      }
+
+      document.getElementById('loading-spinner').style.display = 'flex';
+      document.getElementById('question-card').style.display = 'none';
+      document.getElementById('game-actions').style.display = 'none';
+      hideError();
+
+      try {
+        const question = await generateQuestion(gameState.currentCategory);
+        gameState.currentQuestion = question;
+        gameState.questionCount++;
+        updateProgress();
+        showQuestion(question);
+      } catch (error) {
+        showError(error.message);
+        document.getElementById('loading-spinner').style.display = 'none';
+      }
+    }
+
+    // Complete game
+    function completeGame() {
+      showScreen('screen-complete');
+      document.getElementById('completion-text').textContent =
+        `Ви відповіли на ${gameState.questionCount} питань у категорії "${getCategoryTitle(gameState.currentCategory)}"`;
+    }
+
+    // Reset game
+    function resetGame() {
+      gameState.currentCategory = null;
+      gameState.questionCount = 0;
+      gameState.previousQuestions = [];
+      gameState.currentQuestion = '';
+      showScreen('screen-menu');
+    }
+
+    // Share current question
+    function shareQuestion() {
+      if (gameState.currentQuestion) {
+        tg.sendData(JSON.stringify({
+          category: gameState.currentCategory,
+          question: gameState.currentQuestion,
+          questionNumber: gameState.questionCount + 1
+        }));
+      }
+    }
+
+    // Event Listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      loadAgeConfirmation();
+
+      // Category card clicks
+      document.querySelectorAll('.category-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const category = card.dataset.category;
+
+          if (category === '18+') {
+            if (gameState.ageConfirmed) {
+              startGame(category);
+            } else {
+              showScreen('screen-confirm');
+            }
+          } else {
+            startGame(category);
+          }
+        });
+      });
+
+      // Confirmation buttons
+      document.getElementById('confirm-yes').addEventListener('click', () => {
+        gameState.ageConfirmed = true;
+        saveAgeConfirmation();
+        const adultCard = document.getElementById('adult-card');
+        adultCard.classList.remove('locked');
+        adultCard.querySelector('.category-icon').textContent = '🔓';
+        adultCard.querySelector('.category-desc').textContent = 'Тільки для дорослих';
+        startGame('18+');
+      });
+
+      document.getElementById('confirm-no').addEventListener('click', () => {
+        showScreen('screen-menu');
+      });
+
+      // Game buttons
+      document.getElementById('next-question').addEventListener('click', () => {
+        if (gameState.questionCount >= gameState.maxQuestions - 1) {
+          gameState.questionCount++;
+          completeGame();
+        } else {
+          nextQuestion();
+        }
+      });
+
+      document.getElementById('change-category').addEventListener('click', () => {
+        resetGame();
+      });
+
+      document.getElementById('share-question').addEventListener('click', shareQuestion);
+
+      // Completion buttons
+      document.getElementById('play-again').addEventListener('click', () => {
+        resetGame();
+      });
+
+      document.getElementById('close-app').addEventListener('click', () => {
+        tg.close();
+      });
+    });
+  </script>
+</body>
+</html>
