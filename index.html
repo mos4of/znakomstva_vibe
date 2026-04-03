@@ -245,6 +245,70 @@
       text-align: center;
     }
 
+    .game-stats {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 12px;
+    }
+
+    .stat-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--tg-theme-secondary-bg-color);
+      padding: 6px 12px;
+      border-radius: 8px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--tg-theme-hint-color);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--tg-theme-button-color);
+    }
+
+    .timer-value {
+      color: var(--color-finance);
+    }
+
+    .timer-value.warning {
+      color: var(--color-adult);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    @keyframes scorePopup {
+      0% {
+        transform: translate(-50%, -50%) scale(0.5);
+        opacity: 0;
+      }
+      20% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 1;
+      }
+      40% {
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        transform: translate(-50%, -80%) scale(0.8);
+        opacity: 0;
+      }
+    }
+
     .game-progress {
       height: 6px;
       background: var(--tg-theme-secondary-bg-color);
@@ -449,6 +513,139 @@
         font-size: 18px;
       }
     }
+
+    /* Review Screen Styles */
+    .review-screen {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .review-header {
+      margin-bottom: 20px;
+    }
+
+    .review-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .review-stats {
+      text-align: center;
+      font-size: 14px;
+      color: var(--tg-theme-hint-color);
+      margin-bottom: 16px;
+    }
+
+    .questions-list {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 8px;
+    }
+
+    .question-item {
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 12px;
+      border-left: 4px solid var(--tg-theme-button-color);
+    }
+
+    .question-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .question-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--tg-theme-button-color);
+    }
+
+    .question-score {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--color-finance);
+    }
+
+    .question-text-review {
+      font-size: 14px;
+      line-height: 1.5;
+      color: var(--tg-theme-text-color);
+    }
+
+    .review-actions {
+      margin-top: auto;
+    }
+
+    /* Scrollbar styling */
+    .questions-list::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .questions-list::-webkit-scrollbar-track {
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 3px;
+    }
+
+    .questions-list::-webkit-scrollbar-thumb {
+      background: var(--tg-theme-button-color);
+      border-radius: 3px;
+    }
+
+    /* High Scores Section */
+    .high-scores-section {
+      margin-top: 20px;
+      padding: 16px;
+      background: var(--tg-theme-secondary-bg-color);
+      border-radius: 12px;
+    }
+
+    .high-scores-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      text-align: center;
+      color: var(--tg-theme-button-color);
+    }
+
+    .high-scores-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .high-score-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: rgba(108, 99, 255, 0.1);
+      border-radius: 8px;
+      font-size: 12px;
+    }
+
+    .high-score-category {
+      font-weight: 600;
+      color: var(--tg-theme-text-color);
+    }
+
+    .high-score-value {
+      font-weight: 700;
+      color: var(--color-finance);
+    }
+
+    .no-high-scores {
+      text-align: center;
+      color: var(--tg-theme-hint-color);
+      font-size: 12px;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -494,8 +691,14 @@
 
       <div class="footer">
         <button class="btn btn-secondary btn-small" id="menu-back" style="display: none;">← Назад</button>
-        <div>Питання генерує AI 🤖</div>
+        <div>Питання з локального банку 📚</div>
       </div>
+    </div>
+
+    <!-- High Scores Section -->
+    <div class="high-scores-section" id="high-scores-section">
+      <h3 class="high-scores-title">🏆 Рекорди</h3>
+      <div class="high-scores-list" id="high-scores-list"></div>
     </div>
 
     <!-- Screen 2: 18+ Confirmation -->
@@ -518,6 +721,16 @@
     <div id="screen-game" class="screen">
       <div class="game-header">
         <h2 class="game-title" id="game-category-title">Категорія</h2>
+        <div class="game-stats">
+          <div class="stat-item">
+            <span class="stat-label">Бали:</span>
+            <span class="stat-value" id="score-display">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">Час:</span>
+            <span class="stat-value timer-value" id="timer-display">30</span>
+          </div>
+        </div>
         <div class="game-progress">
           <div class="game-progress-bar" id="progress-bar" style="width: 0%"></div>
         </div>
@@ -555,8 +768,23 @@
         </p>
         <div class="completion-actions">
           <button class="btn" id="play-again">🎮 Грати знову</button>
+          <button class="btn btn-secondary" id="view-questions">📋 Питання (${gameState.answers.length})</button>
           <button class="btn btn-secondary btn-back" id="game-back-complete">← Назад</button>
           <button class="btn btn-secondary" id="close-app">Закрити</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Screen 5: Questions Review -->
+    <div id="screen-review" class="screen">
+      <div class="review-screen">
+        <div class="review-header">
+          <h2 class="review-title">Перегляд питань</h2>
+          <div class="review-stats" id="review-stats"></div>
+        </div>
+        <div class="questions-list" id="questions-list"></div>
+        <div class="review-actions">
+          <button class="btn" id="back-to-completion">← Назад</button>
         </div>
       </div>
     </div>
@@ -601,7 +829,12 @@
       maxQuestions: 10,
       previousQuestions: [],
       ageConfirmed: false,
-      currentQuestion: ''
+      currentQuestion: '',
+      score: 0,
+      timer: null,
+      timeLeft: 30,
+      answers: [], // Store user answers for review
+      gameStartTime: null
     };
 
     // Load age confirmation from localStorage
@@ -828,6 +1061,126 @@
         `Питання ${gameState.questionCount} / ${gameState.maxQuestions}`;
     }
 
+    // Update score display
+    function updateScore() {
+      document.getElementById('score-display').textContent = gameState.score;
+    }
+
+    // Timer functions
+    function startTimer() {
+      gameState.timeLeft = 30;
+      updateTimerDisplay();
+      
+      gameState.timer = setInterval(() => {
+        gameState.timeLeft--;
+        updateTimerDisplay();
+        
+        if (gameState.timeLeft <= 10) {
+          document.getElementById('timer-display').classList.add('warning');
+        }
+        
+        if (gameState.timeLeft <= 0) {
+          clearInterval(gameState.timer);
+          // Time's up - move to next question
+          setTimeout(() => {
+            if (gameState.questionCount < gameState.maxQuestions) {
+              nextQuestion();
+            } else {
+              completeGame();
+            }
+          }, 1000);
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (gameState.timer) {
+        clearInterval(gameState.timer);
+        gameState.timer = null;
+      }
+      document.getElementById('timer-display').classList.remove('warning');
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById('timer-display').textContent = gameState.timeLeft;
+    }
+
+    // Add score based on time remaining
+    function addScore() {
+      const timeBonus = Math.max(0, gameState.timeLeft);
+      const baseScore = 10;
+      const total = baseScore + timeBonus;
+      gameState.score += total;
+      updateScore();
+      
+      // Show score popup
+      showScorePopup(total);
+    }
+
+    function showScorePopup(points) {
+      const popup = document.createElement('div');
+      popup.className = 'score-popup';
+      popup.textContent = `+${points}`;
+      popup.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--tg-theme-button-color);
+        color: var(--tg-theme-button-text-color);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 24px;
+        font-weight: 700;
+        z-index: 1000;
+        animation: scorePopup 1s ease-out forwards;
+      `;
+      document.body.appendChild(popup);
+      
+      setTimeout(() => popup.remove(), 1000);
+    }
+
+    // Questions review functions
+    function showQuestionsReview() {
+      const reviewStats = document.getElementById('review-stats');
+      const questionsList = document.getElementById('questions-list');
+      
+      // Calculate stats
+      const totalScore = gameState.score;
+      const maxPossibleScore = gameState.maxQuestions * (10 + 30);
+      const percentage = Math.round((totalScore / maxPossibleScore) * 100);
+      const avgTime = gameState.answers.length > 0
+        ? Math.round(30 - (totalScore / gameState.answers.length - 10))
+        : 0;
+      
+      reviewStats.innerHTML = `
+        <strong>Статистика:</strong>
+        Бали: ${totalScore}/${maxPossibleScore} (${percentage}%) |
+        Середній час: ~${avgTime}с
+      `;
+      
+      // Render questions
+      questionsList.innerHTML = '';
+      gameState.answers.forEach((answer, index) => {
+        const item = document.createElement('div');
+        item.className = 'question-item';
+        item.innerHTML = `
+          <div class="question-item-header">
+            <span class="question-number">#${index + 1}</span>
+            <span class="question-score">+${answer.scoreEarned} балів</span>
+          </div>
+          <div class="question-text-review">${answer.question}</div>
+        `;
+        questionsList.appendChild(item);
+      });
+      
+      showScreen('screen-review');
+    }
+
+    function backToCompletion() {
+      showScreen('screen-complete');
+    }
+
     // Get category title
     function getCategoryTitle(category) {
       const titles = {
@@ -840,8 +1193,60 @@
       return titles[category] || category;
     }
 
+    // Start game with selected category
+    async function startGame(category) {
+      gameState.currentCategory = category;
+      gameState.questionCount = 0;
+      gameState.previousQuestions = [];
+      gameState.score = 0;
+      gameState.answers = [];
+      gameState.gameStartTime = Date.now();
+
+      showScreen('screen-game');
+      updateProgress();
+      updateScore();
+
+      document.getElementById('game-category-title').textContent = getCategoryTitle(category);
+      document.getElementById('loading-spinner').style.display = 'flex';
+      document.getElementById('question-card').style.display = 'none';
+      document.getElementById('game-actions').style.display = 'none';
+      hideError();
+
+      try {
+        const question = await generateQuestion(category);
+        gameState.currentQuestion = question;
+        showQuestion(question);
+      } catch (error) {
+        showError(error.message);
+        document.getElementById('loading-spinner').style.display = 'none';
+      }
+    }
+
+    // Show question
+    function showQuestion(question) {
+      document.getElementById('loading-spinner').style.display = 'none';
+      document.getElementById('question-card').style.display = 'flex';
+      document.getElementById('question-text').textContent = question;
+      document.getElementById('game-actions').style.display = 'flex';
+      
+      // Start timer when question is shown
+      startTimer();
+    }
+
     // Next question
     async function nextQuestion() {
+      stopTimer();
+      
+      // Add score for current question
+      addScore();
+      
+      // Store answer (in a real app, you'd capture user's answer here)
+      gameState.answers.push({
+        question: gameState.currentQuestion,
+        timeLeft: gameState.timeLeft,
+        scoreEarned: 10 + Math.max(0, gameState.timeLeft)
+      });
+
       if (gameState.questionCount >= gameState.maxQuestions) {
         completeGame();
         return;
@@ -866,18 +1271,152 @@
 
     // Complete game
     function completeGame() {
+      stopTimer();
+      
+      // Save high score
+      const isNewRecord = saveHighScore();
+      
       showScreen('screen-complete');
-      document.getElementById('completion-text').textContent =
-        `Ви відповіли на ${gameState.questionCount} питань у категорії "${getCategoryTitle(gameState.currentCategory)}"`;
+      
+      const totalScore = gameState.score;
+      const maxPossibleScore = gameState.maxQuestions * (10 + 30); // base + max time bonus
+      const percentage = Math.round((totalScore / maxPossibleScore) * 100);
+      const highScore = getHighScore(gameState.currentCategory);
+      
+      let rating = '';
+      if (percentage >= 90) rating = '🏆 Чудово!';
+      else if (percentage >= 70) rating = '⭐ Добре!';
+      else if (percentage >= 50) rating = '👍 Нормально!';
+      else rating = '💪 Практикуйтесь більше!';
+      
+      document.getElementById('completion-text').innerHTML = `
+        <strong>${rating}</strong><br>
+        Ви відповіли на ${gameState.questionCount} питань<br>
+        Бали: <strong>${totalScore}</strong> з ${maxPossibleScore} (${percentage}%)<br>
+        ${isNewRecord ? '🎉 Новий рекорд у цій категорії!' : `Рекорд: ${highScore} балів`}<br>
+        <small>Середній час на відповідь: ~${Math.round(30 - (totalScore / gameState.answers.length - 10))}с</small>
+      `;
+      
+      // Update view questions button count
+      const viewQuestionsBtn = document.getElementById('view-questions');
+      if (viewQuestionsBtn) {
+        viewQuestionsBtn.textContent = `📋 Питання (${gameState.answers.length})`;
+      }
     }
 
-    // Reset game
-    function resetGame() {
-      gameState.currentCategory = null;
-      gameState.questionCount = 0;
-      gameState.previousQuestions = [];
-      gameState.currentQuestion = '';
-      showScreen('screen-menu');
+   // Reset game
+   function resetGame() {
+     stopTimer();
+     gameState.currentCategory = null;
+     gameState.questionCount = 0;
+     gameState.previousQuestions = [];
+     gameState.currentQuestion = '';
+     gameState.score = 0;
+     gameState.answers = [];
+     gameState.gameStartTime = null;
+     updateScore();
+     updateTimerDisplay();
+     loadHighScores(); // Update high scores display
+     showScreen('screen-menu');
+   }
+
+    // Save high score to localStorage
+    function saveHighScore() {
+      const highScores = JSON.parse(localStorage.getItem('gameHighScores') || '{}');
+      const category = gameState.currentCategory;
+      const currentScore = gameState.score;
+      
+      if (!highScores[category] || currentScore > highScores[category]) {
+        highScores[category] = currentScore;
+        localStorage.setItem('gameHighScores', JSON.stringify(highScores));
+        return true;
+      }
+      return false;
+    }
+
+    // Get high score for category
+    function getHighScore(category) {
+      const highScores = JSON.parse(localStorage.getItem('gameHighScores') || '{}');
+      return highScores[category] || 0;
+    }
+
+    // Load and display high scores
+    function loadHighScores() {
+      const highScoresList = document.getElementById('high-scores-list');
+      const highScoresSection = document.getElementById('high-scores-section');
+      const highScores = JSON.parse(localStorage.getItem('gameHighScores') || '{}');
+      
+      const categories = {
+        'знайомство': '🙋 Знайомство',
+        'фінанси': '💰 Фінанси',
+        'зближення': '❤️ Зближення',
+        '18+': '🔥 18+',
+        'рандом': '🎲 Рандом'
+      };
+      
+      if (Object.keys(highScores).length === 0) {
+        highScoresList.innerHTML = '<div class="no-high-scores">Поки що немає рекордів</div>';
+      } else {
+        highScoresList.innerHTML = '';
+        Object.entries(highScores).forEach(([category, score]) => {
+          const item = document.createElement('div');
+          item.className = 'high-score-item';
+          item.innerHTML = `
+            <span class="high-score-category">${categories[category] || category}</span>
+            <span class="high-score-value">${score} балів</span>
+          `;
+          highScoresList.appendChild(item);
+        });
+      }
+      
+      // Show section if there are scores
+      highScoresSection.style.display = Object.keys(highScores).length > 0 ? 'block' : 'none';
+    }
+
+    // Show questions review
+    function showQuestionsReview() {
+      const reviewStats = document.getElementById('review-stats');
+      const questionsList = document.getElementById('questions-list');
+      
+      // Calculate stats
+      const totalScore = gameState.score;
+      const maxPossibleScore = gameState.maxQuestions * (10 + 30);
+      const percentage = Math.round((totalScore / maxPossibleScore) * 100);
+      const avgTime = gameState.answers.length > 0
+        ? Math.round(30 - (totalScore / gameState.answers.length - 10))
+        : 0;
+      
+      // Get high score
+      const highScore = getHighScore(gameState.currentCategory);
+      const isNewRecord = totalScore >= highScore;
+      
+      reviewStats.innerHTML = `
+        <strong>Статистика:</strong>
+        Бали: ${totalScore}/${maxPossibleScore} (${percentage}%) |
+        Середній час: ~${avgTime}с
+        ${isNewRecord ? '<br>🎉 Новий рекорд!' : `<br>Рекорд: ${highScore} балів`}
+      `;
+      
+      // Render questions
+      questionsList.innerHTML = '';
+      gameState.answers.forEach((answer, index) => {
+        const item = document.createElement('div');
+        item.className = 'question-item';
+        item.innerHTML = `
+          <div class="question-item-header">
+            <span class="question-number">#${index + 1}</span>
+            <span class="question-score">+${answer.scoreEarned} балів</span>
+          </div>
+          <div class="question-text-review">${answer.question}</div>
+        `;
+        questionsList.appendChild(item);
+      });
+      
+      showScreen('screen-review');
+    }
+
+    function backToCompletion() {
+      showScreen('screen-complete');
     }
 
     // Share current question
@@ -894,6 +1433,7 @@
     // Event Listeners
     document.addEventListener('DOMContentLoaded', () => {
       loadAgeConfirmation();
+      loadHighScores();
 
       // Category card clicks
       document.querySelectorAll('.category-card').forEach(card => {
@@ -952,9 +1492,17 @@
         resetGame();
       });
 
+      document.getElementById('back-to-completion')?.addEventListener('click', () => {
+        backToCompletion();
+      });
+
       // Completion buttons
       document.getElementById('play-again').addEventListener('click', () => {
         resetGame();
+      });
+
+      document.getElementById('view-questions')?.addEventListener('click', () => {
+        showQuestionsReview();
       });
 
       document.getElementById('close-app').addEventListener('click', () => {
